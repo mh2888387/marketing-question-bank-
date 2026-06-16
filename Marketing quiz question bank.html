@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Marketing Question Bank · Auto-Graded</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<!-- jsPDF for real PDF download (falls back to print if offline) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  :root{
+    --bg1:#eef4ff; --bg2:#f7f0ff; --bg3:#eafff4;
+    --card:#ffffff; --ink:#2b2d42; --muted:#7a7f9a;
+    --brand:#6c8cff; --brand2:#9b6cff;
+    --yellow:#ffd56b; --yellow-d:#f4b42b;
+    --green:#37c98a; --green-bg:#e4fbf0;
+    --red:#ff6b81; --red-bg:#ffe9ee;
+    --pill:#f1f4fb; --pill-line:#e3e8f5;
+    --shadow:0 18px 40px -18px rgba(80,90,160,.45);
+    --radius:22px;
+  }
+  html[data-theme="dark"]{
+    --bg1:#1b1d2b; --bg2:#221c33; --bg3:#16252a;
+    --card:#262a3d; --ink:#eef0ff; --muted:#9aa0c0;
+    --pill:#2e3350; --pill-line:#3a4060;
+    --green-bg:#1e3a31; --red-bg:#3a2230;
+    --shadow:0 18px 40px -18px rgba(0,0,0,.6);
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; font-family:'Nunito',system-ui,sans-serif; color:var(--ink);
+    background:linear-gradient(135deg,var(--bg1),var(--bg2) 45%,var(--bg3));
+    background-attachment:fixed; min-height:100vh; transition:background .5s,color .3s;
+  }
+  .wrap{max-width:760px;margin:0 auto;padding:26px 18px 90px}
+
+  header.hero{text-align:center; padding:14px 0 6px}
+  .badge{
+    display:inline-block; background:var(--yellow); color:#5a3d00;
+    font-family:'Baloo 2'; font-weight:700; padding:6px 16px; border-radius:999px;
+    box-shadow:0 6px 0 var(--yellow-d); letter-spacing:.3px; animation:pop .6s ease;
+  }
+  h1{
+    font-family:'Baloo 2'; font-size:clamp(28px,6vw,44px); margin:14px 0 4px;
+    background:linear-gradient(90deg,var(--brand),var(--brand2));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .sub{color:var(--muted); font-weight:600; margin:0 0 8px}
+  .toolbar{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:14px 0 4px}
+  .btn{
+    border:none; cursor:pointer; font-family:'Nunito'; font-weight:800; font-size:14px;
+    padding:9px 16px; border-radius:999px; background:var(--card); color:var(--ink);
+    box-shadow:var(--shadow); transition:transform .15s, background .3s;
+  }
+  .btn:hover{transform:translateY(-2px)}
+  .btn.ghost{background:transparent;box-shadow:none;border:2px solid var(--pill-line)}
+  .btn.primary{background:linear-gradient(120deg,var(--brand),var(--brand2));color:#fff}
+  .btn.big{font-size:16px;padding:13px 26px}
+  .btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+
+  .tabs{display:flex; gap:10px; overflow-x:auto; padding:14px 4px; margin-top:6px; scrollbar-width:none}
+  .tabs::-webkit-scrollbar{display:none}
+  .tab{
+    flex:0 0 auto; cursor:pointer; border:none; font-family:'Baloo 2'; font-weight:600;
+    padding:12px 18px; border-radius:16px; background:var(--card); color:var(--ink);
+    box-shadow:var(--shadow); transition:transform .18s, background .3s; white-space:nowrap;
+    display:flex; flex-direction:column; align-items:flex-start; gap:2px; min-width:118px;
+  }
+  .tab small{font-family:'Nunito';font-weight:700;color:var(--muted);font-size:11px}
+  .tab.active{background:linear-gradient(120deg,var(--brand),var(--brand2));color:#fff}
+  .tab.active small{color:#eaf0ff}
+  .tab:hover{transform:translateY(-3px)}
+
+  .chap-head{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:18px 4px 8px;flex-wrap:wrap}
+  .chap-head h2{font-family:'Baloo 2';margin:0;font-size:22px}
+  .chap-head p{margin:2px 0 0;color:var(--muted);font-weight:700;font-size:14px}
+  .score-chip{background:var(--card);border-radius:16px;padding:10px 16px;box-shadow:var(--shadow);font-weight:800;font-family:'Baloo 2';min-width:110px;text-align:center}
+  .score-chip span{color:var(--brand)}
+  .progress{height:12px;background:var(--pill);border-radius:999px;overflow:hidden;margin:6px 4px 8px;box-shadow:inset 0 1px 3px rgba(0,0,0,.08)}
+  .progress > i{display:block;height:100%;width:0;border-radius:999px;background:linear-gradient(90deg,var(--green),#5ad6a0);transition:width .5s cubic-bezier(.2,.8,.2,1)}
+  .counter{text-align:right;color:var(--muted);font-weight:800;font-size:13px;margin:0 6px 16px}
+
+  .q{
+    background:var(--card); border-radius:var(--radius); padding:24px 22px 20px; margin:0 0 18px;
+    box-shadow:var(--shadow); animation:rise .45s ease both;
+  }
+  .q .qtop{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+  .qnum{flex:0 0 auto;width:34px;height:34px;border-radius:12px;display:grid;place-items:center;font-family:'Baloo 2';font-weight:700;color:#fff;background:linear-gradient(135deg,var(--brand),var(--brand2))}
+  .qtype{font-size:11px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);background:var(--pill);padding:4px 9px;border-radius:999px}
+  .qtext{font-size:18px;font-weight:700;line-height:1.45;margin:2px 0 18px}
+
+  .opts{display:flex;flex-direction:column;gap:10px}
+  .opt{
+    display:flex;align-items:center;gap:12px;text-align:left;cursor:pointer;
+    background:var(--pill);border:2px solid var(--pill-line);border-radius:14px;
+    padding:13px 14px;font-family:'Nunito';font-weight:700;font-size:15px;color:var(--ink);
+    transition:transform .12s, border-color .2s, background .2s;
+  }
+  .opt:hover:not(.locked){transform:translateX(4px);border-color:var(--brand)}
+  .opt .key{flex:0 0 auto;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:#1c2034;color:var(--brand);font-family:'Baloo 2';font-weight:700;border:2px solid var(--pill-line)}
+  html[data-theme="light"] .opt .key{background:#fff}
+  .opt .mark{margin-left:auto;font-weight:900;font-size:18px;opacity:0;transition:opacity .25s}
+  .opt.correct{background:var(--green-bg);border-color:var(--green);color:var(--green)}
+  .opt.correct .key{background:var(--green);color:#fff;border-color:var(--green)}
+  .opt.correct .mark{opacity:1}
+  .opt.wrong{background:var(--red-bg);border-color:var(--red);color:var(--red)}
+  .opt.wrong .key{background:var(--red);color:#fff;border-color:var(--red)}
+  .opt.wrong .mark{opacity:1}
+  .opt.locked{cursor:default}
+  .opt.dim{opacity:.5}
+
+  .feedback{margin-top:16px;font-weight:800;font-size:14px;border-radius:12px;padding:10px 14px;display:none;animation:rise .35s both}
+  .feedback.ok{display:block;background:var(--green-bg);color:var(--green)}
+  .feedback.no{display:block;background:var(--red-bg);color:var(--red)}
+
+  .navrow{display:flex;justify-content:space-between;align-items:center;margin-top:6px;gap:10px}
+
+  .done{text-align:center;background:var(--card);border-radius:var(--radius);padding:30px 24px;box-shadow:var(--shadow);margin-top:10px;display:none;animation:pop .5s ease}
+  .done.show{display:block}
+  .done h3{font-family:'Baloo 2';font-size:26px;margin:6px 0}
+  .done .big{font-size:50px;font-family:'Baloo 2';color:var(--brand)}
+  .done .wrongnote{color:var(--muted);font-weight:700;margin:10px 0 20px}
+  .done .actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+
+  footer{text-align:center;color:var(--muted);font-weight:700;font-size:13px;margin-top:30px}
+  .confetti{position:fixed;top:-10px;width:10px;height:14px;opacity:.9;z-index:50;border-radius:2px;animation:fall linear forwards}
+
+  @keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes pop{0%{transform:scale(.85);opacity:0}100%{transform:scale(1);opacity:1}}
+  @keyframes fall{to{transform:translateY(105vh) rotate(720deg);opacity:0}}
+  @media (max-width:520px){.qtext{font-size:16px}.opt{font-size:14px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <span class="badge">📚 Quiz Time!</span>
+    <h1>Marketing Question Bank</h1>
+    <p class="sub">One question at a time · auto-graded · download your mistakes</p>
+    <div class="toolbar">
+      <button class="btn" id="themeBtn">☀️ Light Mode</button>
+      <button class="btn ghost" id="resetBtn">↺ Restart Chapter</button>
+    </div>
+  </header>
+
+  <nav class="tabs" id="tabs"></nav>
+
+  <div class="chap-head">
+    <div>
+      <h2 id="chTitle"></h2>
+      <p id="chSub"></p>
+    </div>
+    <div class="score-chip">Score: <span id="score">0</span> / <span id="total">0</span></div>
+  </div>
+  <div class="progress"><i id="bar"></i></div>
+  <div class="counter" id="counter"></div>
+
+  <main id="quiz"></main>
+
+  <div class="done" id="done">
+    <div class="big" id="doneScore"></div>
+    <h3 id="doneMsg"></h3>
+    <p class="wrongnote" id="wrongNote"></p>
+    <div class="actions">
+      <button class="btn primary big" id="dlBtn">⬇️ Download wrong answers (PDF)</button>
+      <button class="btn ghost big" id="retryBtn">↺ Retry chapter</button>
+    </div>
+  </div>
+
+  <footer>Built from your 5 marketing PDFs · 125 questions · Auto-corrected ✦</footer>
+</div>
+
+<script>
+const TF=["True","False"];
+const chapters=[
+  { id:"ch1", title:"Chapter 1", subtitle:"Marketing Basics & Orientations (Assignment 1)", questions:[
+    {t:"Q",q:"In the early 1920s, Ford promised customers any color as long as it was black, assuming buyers would accept black, offering only one variety in large quantities. Ford is an example of a market-oriented firm.",o:TF,a:1},
+    {t:"Q",q:"Sara Lee developed a crustless bread with no prior market research, confident its science & technology dept produced a winner. Sara Lee is a good example of a production-oriented company.",o:TF,a:0},
+    {t:"M",q:"Refer to Starbucks: for 30+ years it held \"If we build it, they will come.\" This is most in line with a ___ orientation.",o:["production","societal","sales","market","product"],a:0},
+    {t:"M",q:"SAP pledged to put the \"customer at the center\" of its universe. SAP captured the idea of:",o:["the 80/20 rule","the sales orientation philosophy","the marketing concept","Maslow's hierarchy of needs","the societal concept"],a:2},
+    {t:"M",q:"Which is the customer's evaluation of a good/service in terms of whether it met his/her needs and expectations?",o:["attitude","dissonance","satisfaction","perception","value"],a:2},
+    {t:"Q",q:"Marketing is defined as producing, promoting, and selling products.",o:TF,a:1},
+    {t:"M",q:"Planning & development of a product, its pricing policy, and distribution strategy are all part of:",o:["a control system","marketing","human resources","production","accounting"],a:1},
+    {t:"Q",q:"The goal of most market-oriented firms is profitability that results from satisfying the wants and needs of its consumers.",o:TF,a:0},
+    {t:"M",q:"The American Marketing Association's definition of marketing:",o:["includes creating, communicating, delivering and exchanging offerings that have value for customers, clients, partners, and society at large","focuses on empowerment, teamwork, and customer value","shows how marketing benefits the marketer","is limited to promotional activities","relies on the synergy created by exchange"],a:0},
+    {t:"Q",q:"Salespeople in market-oriented organizations are generally perceived by customers as problem solvers and important links to supply sources and new products.",o:TF,a:0},
+    {t:"Q",q:"Unlike a production-oriented firm, a sales-oriented firm focuses on customer wants and needs so it can develop the best product at the lowest cost requiring very little selling effort.",o:TF,a:1},
+    {t:"M",q:"Marketers interested in offering customer value can:",o:["do all of these","offer products that perform","avoid unrealistic pricing","give the consumer facts","offer organization-wide commitment to service and after-the-sale support"],a:0},
+    {t:"Q",q:"Marketing should be part of the job of everyone in the organization, not just those in marketing.",o:TF,a:0},
+    {t:"Q",q:"An exchange cannot take place unless each party in the exchange has something the other party values.",o:TF,a:0},
+    {t:"Q",q:"The societal marketing concept considers society's long-term best interests along with customer satisfaction.",o:TF,a:0},
+    {t:"M",q:"Indonesian logging companies harvest rain forests and assume a market exists. The typical company has a(n) ___ orientation.",o:["production","exchange","product","environmental","sales"],a:0},
+    {t:"Q",q:"While most marketing organizations rely on promotion, sales-oriented organizations make the most effective use of their entire marketing mix.",o:TF,a:1},
+    {t:"M",q:"The ___ orientation assumes people will buy more if aggressive selling techniques are used.",o:["market","customer","production","sales","exchange"],a:3},
+    {t:"Q",q:"The marketing concept states the social and economic justification for an organization's existence is satisfying customers' wants and needs while meeting organizational objectives.",o:TF,a:0},
+    {t:"Q",q:"The way to achieve customer satisfaction and value is to offer the lowest price.",o:TF,a:1},
+    {t:"M",q:"One facet of marketing is that it is:",o:["a short-term approach to profit maximization","independent of value creation","a philosophy that stresses customer satisfaction","an approach that requires diversity","an approach focused on maximizing sales"],a:2},
+    {t:"Q",q:"Per the AMA, marketing is the activity, set of institutions, and processes for creating, communicating, delivering, and exchanging offerings that have value for customers, clients, partners, and society at large.",o:TF,a:0},
+    {t:"M",q:"An organization with a(n) ___ believes it exists not only to satisfy customers and meet objectives but also to preserve/enhance society's long-term best interests.",o:["societal orientation","sales orientation","focused target market strategy","ethical business mission","market orientation"],a:0},
+    {t:"M",q:"___ is the relationship between benefits and the sacrifice necessary to obtain those benefits.",o:["Marketing utility","Opportunity cost","Customer value","Market quality","Satisfaction percentage"],a:2},
+    {t:"Q",q:"Customer value is the relationship between company profits and company costs.",o:TF,a:1}
+  ]},
+  { id:"ch2", title:"Chapter 2", subtitle:"Strategic Planning & Targeting (Assignment 2)", questions:[
+    {t:"Q",q:"Home Depot's purchase of Hughes Supply lets it better meet the needs of current business customers. This is an example of product development.",o:TF,a:0},
+    {t:"Q",q:"The 80/20 principle implies the majority of all demand is due to a minority of customers.",o:TF,a:0},
+    {t:"Q",q:"A diversification strategy entails increasing sales by introducing new products into new markets.",o:TF,a:0},
+    {t:"M",q:"In the portfolio matrix, a business unit with low growth potential and small market share is called a(n):",o:["dog","cash cow","problem child"],a:0},
+    {t:"M",q:"___ is the managerial process of creating and maintaining a fit between the organization's objectives/resources and evolving market opportunities.",o:["Tactical management","The market audit","Functional planning","Strategic planning"],a:3},
+    {t:"Q",q:"Typically, development of the marketing mix starts with determining the promotion for a product.",o:TF,a:1},
+    {t:"M",q:"Which is a means of graphing, in two+ dimensions, the location of products/brands in customers' minds?",o:["perceptual mapping","product positioning","market segmentation"],a:0},
+    {t:"Q",q:"A production costs analysis could be a part of a company's SWOT analysis.",o:TF,a:0},
+    {t:"Q",q:"Dakin Farms uses mass marketing. Marketers would call the strategy an undifferentiated targeting strategy.",o:TF,a:0},
+    {t:"Q",q:"A firm's mission statement should answer the question, \"What products do we produce best?\"",o:TF,a:1},
+    {t:"Q",q:"A segmentation plan must produce segments with responsiveness, meaning all segments respond similarly to a marketing mix.",o:TF,a:1},
+    {t:"M",q:"A(n) ___ strategy selects one segment to target and focuses on understanding that segment's needs and developing a highly specialized marketing mix.",o:["market development","product development","concentrated targeting","undifferentiated targeting"],a:2},
+    {t:"Q",q:"Niche marketing is a form of concentrated targeting.",o:TF,a:0},
+    {t:"Q",q:"A portfolio matrix allocates resources among products/SBUs on the basis of relative market share and degree of innovation.",o:TF,a:1},
+    {t:"Q",q:"When eBay opened eBayfrance for the French market, it was an example of market penetration.",o:TF,a:1},
+    {t:"Q",q:"A competitive advantage is a unique aspect of a firm's offering (or the firm itself) that causes target customers to patronize it over competitors.",o:TF,a:0},
+    {t:"Q",q:"P&G markets six brands of laundry detergent (Tide, ERA, Gain, Dreft), each targeting a different segment. This is an example of concentrated targeting.",o:TF,a:1},
+    {t:"M",q:"Which portfolio matrix category is a market leader that is growing fast?",o:["dog","cash cow","star"],a:2},
+    {t:"Q",q:"Environmental scanning entails collecting and analyzing information about factors that may affect the organization, plus identifying market opportunities and threats.",o:TF,a:0},
+    {t:"Q",q:"A market penetration strategy entails the creation of new products for current customers.",o:TF,a:1},
+    {t:"Q",q:"The most critical element for successful strategic planning is top management's support and participation.",o:TF,a:0},
+    {t:"M",q:"All of the following are categories in the Boston Consulting Group's portfolio matrix EXCEPT:",o:["cash cows","meat eaters","stars","dogs","problem children"],a:1},
+    {t:"Q",q:"A marketing audit helps management allocate marketing resources efficiently.",o:TF,a:0},
+    {t:"Q",q:"Berkshire Hathaway (insurance) owns jewelry stores and bought Russell Corp (sporting goods). Berkshire uses a market penetration strategy.",o:TF,a:1},
+    {t:"Q",q:"The marketing plan is a written document that acts as a guidebook of marketing activities for a marketing manager.",o:TF,a:0},
+    {t:"Q",q:"The four Ps of the marketing mix are product, planning, promotion, and price.",o:TF,a:1},
+    {t:"Q",q:"The manufacturer of Macho brand martial arts products was implementing a strategic plan when it sponsored a local karate tournament for teenagers.",o:TF,a:1},
+    {t:"Q",q:"Developing a competitive cost advantage can enable a firm to deliver superior customer value.",o:TF,a:0},
+    {t:"M",q:"Which represents a business unit that shows rapid growth but poor profit margins?",o:["star","dog","cash cow","problem child"],a:3},
+    {t:"Q",q:"Consumers' perceptions regarding a product's position cannot be changed.",o:TF,a:1},
+    {t:"Q",q:"U.S. paint makers use different formulae for the humid Southeast, frigid Midwest, and hot/dry Southwest. This is an example of demographic segmentation.",o:TF,a:1},
+    {t:"M",q:"A business unit that usually generates more than it needs to maintain its market share is called a(n) ___ in a portfolio matrix.",o:["cash cow","problem child","dog","star"],a:0},
+    {t:"Q",q:"The development of a target market strategy begins with a marketing audit.",o:TF,a:1},
+    {t:"Q",q:"The first step in segmenting a market is to choose a basis or bases for segmenting the markets.",o:TF,a:1},
+    {t:"Q",q:"A product's position refers to where it is located on store shelves.",o:TF,a:1},
+    {t:"Q",q:"When a florist shop begins to sell burial caskets to its customers, it is engaged in product development.",o:TF,a:0},
+    {t:"Q",q:"To be useful, marketing objectives should meet four criteria: realistic, measurable, time-specific, and based on sales.",o:TF,a:1},
+    {t:"Q",q:"Marketing strategy involves selecting/describing target markets and developing/maintaining a marketing mix that produces mutually satisfying exchanges.",o:TF,a:0},
+    {t:"Q",q:"\"The company's objective is to increase sales next year.\" This is an example of a well-stated objective.",o:TF,a:1},
+    {t:"M",q:"Strategic plans require:",o:["new product development","changes in prices","a change in organizational structure","long-term resource commitments"],a:3}
+  ]},
+  { id:"ch3", title:"Chapter 3", subtitle:"Strategy, Positioning & Segmentation (Quiz 1)", questions:[
+    {t:"Q",q:"Selling Orientation is the orientation of managers when they focus on making superior products and improving them over time.",o:TF,a:1},
+    {t:"Q",q:"Companies have to spend more money to acquire new customers and less to keep current customers.",o:TF,a:1},
+    {t:"Q",q:"Perceived Value is the maximum a customer or prospective customer will pay for your product or service.",o:TF,a:0},
+    {t:"Q",q:"Consumers' perceptions regarding a product's position cannot be changed.",o:TF,a:1},
+    {t:"Q",q:"Perceptual mapping is a graphic technique used by marketers to visually display the perceptions of customers or potential customers.",o:TF,a:0},
+    {t:"M",q:"___ is the managerial process of creating and maintaining a fit between objectives/resources and evolving market opportunities.",o:["Strategic planning","Functional planning","The market audit","Environmental scanning","Tactical management"],a:0},
+    {t:"Q",q:"Market growth is the only pointer that affects choosing the segment.",o:TF,a:1},
+    {t:"M",q:"Market penetration occurs when:",o:["a U.S.-based company begins to sell in China","Motown records sell DVDs to Wal-Mart","a supermarket adds a new store","Yoplait yogurt sends coupons to its existing customers"],a:3},
+    {t:"M",q:"Ford produces cars, trucks, specialty, performance & race vehicles. Ford uses a procedure called ___ to divide its large market.",o:["Market segmentation","Positioning","Micromarketing","Perceptual mapping"],a:0},
+    {t:"Q",q:"Market share is the percentage of all sales within a market that is held by one product or company.",o:TF,a:0},
+    {t:"Q",q:"A product's position refers to where it is located on store shelves.",o:TF,a:1},
+    {t:"M",q:"___ is a strategy that attempts to attract new customers to existing products.",o:["Diversification","Product development","Market development","Market penetration"],a:2},
+    {t:"Q",q:"Kraft introduced Philadelphia Ready-to-eat Cheesecake Filling for those short on time. This is an example of a product development strategy.",o:TF,a:0},
+    {t:"Q",q:"Cash cows (BCG matrix) refer to products that are potentially very profitable but need large investment.",o:TF,a:1},
+    {t:"M",q:"Technol Medical Products makes specialty face masks, outselling 3M and J&J in this narrow market. Technol has a(n):",o:["aggregated positioning strategy","niche competitive advantage","cost competitive advantage","demarketing focus"],a:1},
+    {t:"Q",q:"The marketing strategy used by the firm was approved only by the marketing manager.",o:TF,a:1},
+    {t:"M",q:"A ___ is defined as a statement of what is to be accomplished through marketing activities.",o:["marketing criteria","Mission statement","marketing objective","business plan"],a:2},
+    {t:"M",q:"Russell Athleticwear (Berkshire Hathaway) is a market leader in a rapidly growing industry. It is an example of a ___ per the portfolio matrix.",o:["Dog","Cash cow","Star","Question mark"],a:2},
+    {t:"M",q:"X company targets the whole market with one toothpaste & soap offer, focusing on customer needs rather than differences. This is known as:",o:["Mass marketing","One-to-one marketing","Niche marketing","Differentiated marketing"],a:0},
+    {t:"Q",q:"Companies may target segments that are smaller and less attractive, but that are more profitable to them.",o:TF,a:0}
+  ]},
+  { id:"ch4", title:"Chapter 4", subtitle:"Products, Branding & PLC (Assignment 3)", questions:[
+    {t:"Q",q:"Shopping products, though inexpensive, still require considerable shopping effort by buyers.",o:TF,a:0},
+    {t:"Q",q:"Fruits and vegetables are considered as industrial products.",o:TF,a:0},
+    {t:"Q",q:"When French's introduced Dijon, Honey, and Sweet Onion mustard, it was an example of cobranding.",o:TF,a:1},
+    {t:"M",q:"Which is NOT an example of a product's tangible feature?",o:["brand equity","packaging","size","weight","color"],a:0},
+    {t:"M",q:"Apple expanded iPod Touch storage from 8GB to 16GB. Enlarging storage capacity is an example of a:",o:["demographic modification","product diversification","brand mix extension","brand repositioning","product modification"],a:4},
+    {t:"Q",q:"Apple added the iPhone to its list of products. The addition was an example of a product line extension.",o:TF,a:0},
+    {t:"M",q:"Which would be considered a new product?",o:["addition to existing product lines","new product lines","improvements/revisions to existing products","new-to-the-world product","all of these choices"],a:4},
+    {t:"Q",q:"Coca-Cola makes 2,800+ beverage products. The great variety represents its product mix.",o:TF,a:0},
+    {t:"Q",q:"Co-branding means introducing a new brand into the market.",o:TF,a:1},
+    {t:"M",q:"What is 'brand equity'?",o:["The amount spent on advertising","The total cost of producing a brand","The market share held by a brand","The value added to a product by having a well-known brand name"],a:3},
+    {t:"Q",q:"Omega watches are expensive, sold only in high-end stores, and buyers accept no substitutes. Omega is an example of a specialty product.",o:TF,a:0},
+    {t:"M",q:"Rexona added an antiperspirant, stick deodorant, Rexona for Men/Women/Teens, and Skin Friendly. These additions are examples of:",o:["product portfolio width adjustments","product line extensions","SBU expansions","product mix widths","product item contractions"],a:1},
+    {t:"Q",q:"Intangibility is the basic property of a service which makes it different from a product.",o:TF,a:0},
+    {t:"M",q:"Brand loyalty can:",o:["encourage competition","help ensure repeat sales","sell a bad product","increase product diffusion","shorten time a product spends in maturity"],a:1},
+    {t:"M",q:"Product mix width may be defined as:",o:["the average number of products offered by the company","the number of different product lines an organization offers for sale","the number of product categories in an industry","the average number of products within each product line"],a:1},
+    {t:"Q",q:"The most important functions of packaging are to contain/protect products, promote products, facilitate storage, and facilitate recycling.",o:TF,a:0},
+    {t:"M",q:"Why is creation of a product the starting point for the marketing mix?",o:["Production dept must know what to produce first","Promotional strategies are often the starting point","Product development takes the longest time","Production strategy is the first of the four Ps","Determination of price, promotion, and distribution cannot begin until the product has been specified"],a:4},
+    {t:"M",q:"The large variety of toothpastes under the Crest brand (Cavity-protection, Sensitive, Baking Soda, etc.) is an example of a:",o:["product modification","product equity","product mix","marketing mix","product line"],a:4},
+    {t:"M",q:"Which product can be said to be at the decline stage of its PLC?",o:["Digital televisions","VHS video cassettes","3D printers","Third generation mobile phones"],a:1},
+    {t:"Q",q:"Commercialization is a technique considered most useful for generating new-product ideas.",o:TF,a:1}
+  ]},
+  { id:"ch5", title:"Chapter 5", subtitle:"Marketing Channels & Distribution (Assignment 6)", questions:[
+    {t:"Q",q:"A merchant wholesaler buys goods from manufacturers and resells them to businesses, government agencies, and other wholesalers or retailers.",o:TF,a:0},
+    {t:"M",q:"Which intermediaries sell mainly to consumers?",o:["brokers","merchant wholesalers","specialists","retailers","agents"],a:3},
+    {t:"Q",q:"Metallurgical Designs markets gold/silver charms to a few retailers in one region and promotes them intensively. This is an example of intensive distribution.",o:TF,a:1},
+    {t:"Q",q:"A marketing channel is a business structure of interdependent organizations reaching from product origin to the final consumer.",o:TF,a:0},
+    {t:"Q",q:"With 4 manufacturers, no intermediaries, and 3 consumers, twelve transactions are needed; one intermediary reduces transactions to four, showing contact efficiency.",o:TF,a:1},
+    {t:"Q",q:"Subcontracting is to delegate to another organization all or part of logistical activities.",o:TF,a:1},
+    {t:"M",q:"A(n) ___ buys goods from manufacturers, takes title, and resells them to businesses, agencies, or other wholesalers/retailers.",o:["channel cooperative","agent","merchant wholesaler","marketing cooperative","drop shipper"],a:2},
+    {t:"M",q:"___ describes strategically managing the efficient flow and storage of raw materials, in-process inventory, and finished goods from origin to consumption.",o:["Logistics","Cross-docking","Disintermediation","Channel facilitation","Contract logistics"],a:0},
+    {t:"M",q:"The products are shopping goods and the manufacturer wants consumers to seek them out to maintain a superior image. This is ___ distribution.",o:["extensive","reflexive","unitary","intensive","selective"],a:4},
+    {t:"Q",q:"LoneStar sells its popular marinade at its restaurants and at Kroger supermarkets. This is an example of intensive distribution.",o:TF,a:1},
+    {t:"Q",q:"The logistical functions performed by intermediaries include physically distributing, storing, sorting, and financing.",o:TF,a:1},
+    {t:"Q",q:"A company's supply chain includes all companies in upstream and downstream flows of products, services, finances, and information, from initial suppliers to the ultimate customer.",o:TF,a:0},
+    {t:"Q",q:"The direct channel is used more often in consumer markets than in business-to-business markets.",o:TF,a:1},
+    {t:"Q",q:"The three basic functions a channel intermediary provides are transactional, logistical, and facilitating functions.",o:TF,a:0},
+    {t:"M",q:"Channel conflict that occurs between different levels in a marketing channel is referred to as:",o:["primary conflict","secondary conflict","horizontal conflict","vertical conflict","parallel conflict"],a:3},
+    {t:"Q",q:"Harriet Lowe sells children's clothing at craft festivals to end users, using no channel intermediaries, which means she uses a direct channel.",o:TF,a:0},
+    {t:"Q",q:"Shopping goods are usually distributed selectively; consumers will look around but may not search/travel extensively to acquire the product.",o:TF,a:0},
+    {t:"M",q:"___ distribution occurs when a producer selects two or more different channels to distribute the same products to target markets.",o:["Dual","Contractual","Cumulative","Selective","Intensive"],a:0},
+    {t:"Q",q:"Exclusive distribution is the most extensive form of market coverage.",o:TF,a:1},
+    {t:"M",q:"A ___ is a business structure of interdependent organizations reaching from product origin to the consumer.",o:["marketing channel or channel of distribution","marketing mix intermediary","transportation channel or channel of movement","facilitating agency or place member","selective distribution channel"],a:0}
+  ]}
+];
+
+const tabsEl=document.getElementById('tabs');
+const quizEl=document.getElementById('quiz');
+const chTitle=document.getElementById('chTitle');
+const chSub=document.getElementById('chSub');
+const scoreEl=document.getElementById('score');
+const totalEl=document.getElementById('total');
+const barEl=document.getElementById('bar');
+const counterEl=document.getElementById('counter');
+const doneEl=document.getElementById('done');
+const KEYS=['A','B','C','D','E'];
+let current=0;
+const state={};
+
+chapters.forEach((c,i)=>{
+  state[c.id]={answers:{},correct:0,pos:0};
+  const b=document.createElement('button');
+  b.className='tab'+(i===0?' active':'');
+  b.innerHTML=`${c.title}<small>${c.questions.length} questions</small>`;
+  b.onclick=()=>selectChapter(i);
+  tabsEl.appendChild(b);
+});
+
+function selectChapter(i){
+  current=i;
+  [...tabsEl.children].forEach((t,idx)=>t.classList.toggle('active',idx===i));
+  render();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function render(){
+  const c=chapters[current];
+  chTitle.textContent=`${c.title}`;
+  chSub.textContent=c.subtitle;
+  totalEl.textContent=c.questions.length;
+  doneEl.classList.remove('show');
+  showQuestion();
+}
+
+function showQuestion(){
+  const c=chapters[current];
+  const st=state[c.id];
+  const pos=st.pos;
+  scoreEl.textContent=st.correct;
+  barEl.style.width=Math.round((pos)/c.questions.length*100)+'%';
+
+  if(pos>=c.questions.length){ finish(); return; }
+  counterEl.textContent=`Question ${pos+1} of ${c.questions.length}`;
+  barEl.style.width=Math.round((Object.keys(st.answers).length)/c.questions.length*100)+'%';
+
+  const q=c.questions[pos];
+  const answered=st.answers.hasOwnProperty(pos);
+  const chosen=st.answers[pos];
+
+  quizEl.innerHTML='';
+  const card=document.createElement('section');
+  card.className='q';
+  card.innerHTML=`
+    <div class="qtop">
+      <div class="qnum">${pos+1}</div>
+      <span class="qtype">${q.t==='Q'?'True / False':'Multiple Choice'}</span>
+    </div>
+    <div class="qtext">${q.q}</div>
+    <div class="opts"></div>
+    <div class="feedback"></div>
+    <div class="navrow">
+      <button class="btn ghost" id="prevBtn" ${pos===0?'disabled':''}>← Previous</button>
+      <button class="btn primary" id="nextBtn" ${answered?'':'disabled'}>${pos===c.questions.length-1?'Finish ✓':'Next →'}</button>
+    </div>`;
+  const opts=card.querySelector('.opts');
+  const fb=card.querySelector('.feedback');
+
+  q.o.forEach((opt,oi)=>{
+    const btn=document.createElement('button');
+    btn.className='opt';
+    btn.innerHTML=`<span class="key">${KEYS[oi]}</span><span>${opt}</span><span class="mark"></span>`;
+    btn.onclick=()=>choose(oi);
+    opts.appendChild(btn);
+  });
+  quizEl.appendChild(card);
+
+  if(answered) paintAnswered(opts,fb,q,chosen);
+
+  card.querySelector('#nextBtn').onclick=()=>{ st.pos++; showQuestion(); window.scrollTo({top:0,behavior:'smooth'}); };
+  card.querySelector('#prevBtn').onclick=()=>{ if(st.pos>0){st.pos--; showQuestion(); window.scrollTo({top:0,behavior:'smooth'});} };
+
+  function choose(oi){
+    if(st.answers.hasOwnProperty(pos)) return;
+    st.answers[pos]=oi;
+    if(oi===q.a) st.correct++;
+    paintAnswered(opts,fb,q,oi);
+    card.querySelector('#nextBtn').disabled=false;
+    scoreEl.textContent=st.correct;
+    barEl.style.width=Math.round(Object.keys(st.answers).length/c.questions.length*100)+'%';
+  }
+}
+
+function paintAnswered(opts,fb,q,chosen){
+  [...opts.children].forEach((b,idx)=>{
+    b.classList.add('locked');
+    const mk=b.querySelector('.mark');
+    if(idx===q.a){b.classList.add('correct');mk.textContent='✓';}
+    else b.classList.add('dim');
+    if(idx===chosen && chosen!==q.a){b.classList.remove('dim');b.classList.add('wrong');b.querySelector('.mark').textContent='✗';}
+  });
+  if(chosen===q.a){fb.className='feedback ok';fb.textContent='✅ Correct! Nice work.';}
+  else{fb.className='feedback no';fb.textContent='❌ Not quite — the correct answer is highlighted above.';}
+}
+
+function getWrong(c){
+  const st=state[c.id];
+  const wrong=[];
+  c.questions.forEach((q,qi)=>{
+    const ch=st.answers[qi];
+    if(ch!==undefined && ch!==q.a){
+      wrong.push({n:qi+1,q:q.q,your:q.o[ch],correct:q.o[q.a]});
+    }
+  });
+  return wrong;
+}
+
+function finish(){
+  const c=chapters[current];
+  const st=state[c.id];
+  quizEl.innerHTML='';
+  counterEl.textContent='Completed';
+  barEl.style.width='100%';
+  const total=c.questions.length;
+  const pct=Math.round(st.correct/total*100);
+  const wrong=getWrong(c);
+
+  doneEl.classList.add('show');
+  document.getElementById('doneScore').textContent=`${st.correct}/${total}`;
+  let msg;
+  if(pct===100) msg='Perfect score! 🏆';
+  else if(pct>=80) msg='Great job! 🎉';
+  else if(pct>=50) msg='Good effort — review the misses 💪';
+  else msg='Keep practicing 📖';
+  document.getElementById('doneMsg').textContent=`${msg}  (${pct}%)`;
+  const wn=document.getElementById('wrongNote');
+  const dl=document.getElementById('dlBtn');
+  if(wrong.length===0){
+    wn.textContent='No wrong answers — nothing to download. 🌟';
+    dl.disabled=true;
+  } else {
+    wn.textContent=`You missed ${wrong.length} question${wrong.length>1?'s':''}. Download them to review.`;
+    dl.disabled=false;
+  }
+  dl.onclick=()=>downloadWrongPDF(c,wrong,pct);
+  document.getElementById('retryBtn').onclick=()=>{ state[c.id]={answers:{},correct:0,pos:0}; render(); window.scrollTo({top:0,behavior:'smooth'}); };
+  if(pct>=80) confetti();
+}
+
+function downloadWrongPDF(c,wrong,pct){
+  if(!(window.jspdf && window.jspdf.jsPDF)){ printFallback(c,wrong,pct); return; }
+  const { jsPDF }=window.jspdf;
+  const doc=new jsPDF({unit:'pt',format:'a4'});
+  const M=48, W=595-M*2; let y=60;
+
+  doc.setFont('helvetica','bold'); doc.setFontSize(20); doc.setTextColor(40,40,70);
+  doc.text('Wrong Answers — Review Sheet', M, y); y+=24;
+  doc.setFont('helvetica','normal'); doc.setFontSize(11); doc.setTextColor(110,110,140);
+  doc.text(`${c.title}: ${c.subtitle}`, M, y); y+=16;
+  doc.text(`Score: ${pct}%   |   Missed: ${wrong.length}   |   Date: ${new Date().toLocaleString()}`, M, y); y+=14;
+  doc.setDrawColor(220,220,235); doc.line(M,y,595-M,y); y+=24;
+
+  wrong.forEach((w)=>{
+    const qLines=doc.splitTextToSize(`Q${w.n}. ${w.q}`, W);
+    const yourLines=doc.splitTextToSize(`Your answer: ${w.your}`, W-12);
+    const corrLines=doc.splitTextToSize(`Correct answer: ${w.correct}`, W-12);
+    const blockH=qLines.length*15 + yourLines.length*14 + corrLines.length*14 + 30;
+    if(y+blockH>800){ doc.addPage(); y=60; }
+
+    doc.setFont('helvetica','bold'); doc.setFontSize(11.5); doc.setTextColor(40,40,70);
+    doc.text(qLines, M, y); y+=qLines.length*15+4;
+    doc.setFont('helvetica','normal'); doc.setFontSize(10.5); doc.setTextColor(200,60,80);
+    doc.text(yourLines, M+12, y); y+=yourLines.length*14+2;
+    doc.setTextColor(30,150,100);
+    doc.text(corrLines, M+12, y); y+=corrLines.length*14+16;
+  });
+
+  doc.save(`${c.title.replace(/\s+/g,'_')}_wrong_answers.pdf`);
+}
+
+function printFallback(c,wrong,pct){
+  const win=window.open('','_blank');
+  const rows=wrong.map(w=>`<div style="margin:0 0 16px"><p style="font-weight:700;color:#2b2d42">Q${w.n}. ${w.q}</p>
+    <p style="color:#c0294f;margin:4px 0 0 12px">Your answer: ${w.your}</p>
+    <p style="color:#1e966a;margin:2px 0 0 12px">Correct answer: ${w.correct}</p></div>`).join('');
+  win.document.write(`<html><head><title>${c.title} — Wrong Answers</title></head>
+    <body style="font-family:Arial,sans-serif;padding:40px;max-width:760px;margin:auto">
+    <h1 style="color:#33365a">Wrong Answers — Review Sheet</h1>
+    <p style="color:#666">${c.title}: ${c.subtitle} · Score ${pct}% · Missed ${wrong.length}</p><hr>${rows}
+    <script>window.onload=()=>window.print()<\/script></body></html>`);
+  win.document.close();
+}
+
+function confetti(){
+  const colors=['#6c8cff','#9b6cff','#ffd56b','#37c98a','#ff6b81'];
+  for(let i=0;i<70;i++){
+    const c=document.createElement('div');
+    c.className='confetti';
+    c.style.left=Math.random()*100+'vw';
+    c.style.background=colors[i%colors.length];
+    c.style.animationDuration=(2+Math.random()*2)+'s';
+    c.style.animationDelay=(Math.random()*0.6)+'s';
+    document.body.appendChild(c);
+    setTimeout(()=>c.remove(),4200);
+  }
+}
+
+document.getElementById('resetBtn').onclick=()=>{ state[chapters[current].id]={answers:{},correct:0,pos:0}; render(); };
+const themeBtn=document.getElementById('themeBtn');
+themeBtn.onclick=()=>{
+  const dark=document.documentElement.getAttribute('data-theme')==='dark';
+  document.documentElement.setAttribute('data-theme',dark?'light':'dark');
+  themeBtn.textContent=dark?'🌙 Comfort Dark':'☀️ Light Mode';
+};
+
+render();
+</script>
+</body>
+</html>
